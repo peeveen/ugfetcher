@@ -72,15 +72,9 @@ class Song(data: SongResultStorePageData) {
 				else
 					workingContent.length
 				val markerContent = workingContent.substring(0, endIndex).let {
-					val startsWithMarker = it.startsWith(startMarker)
-					val endsWithMarker = it.endsWith(endMarker)
-					if (startsWithMarker && endsWithMarker)
-						it.substring(startMarkerLength, it.length - endMarkerLength)
-					else if (startsWithMarker)
-						it.substring(startMarkerLength, it.length)
-					else if (endsWithMarker)
-						it.substring(0, it.length - endMarkerLength)
-					else it
+					val start = if (it.startsWith(startMarker)) startMarkerLength else 0
+					val end = it.length - if (it.endsWith(endMarker)) endMarkerLength else 0
+					it.substring(start, end)
 				}.trim('\r').trim('\n')
 				if (markerContent.isNotEmpty())
 					fn(markerContent, startIndex)
