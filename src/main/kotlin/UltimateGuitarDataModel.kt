@@ -31,7 +31,11 @@ data class TabInfo(
 	val type: String? = null,
 	val version: Int = 0,
 	val rating: Double = 0.0,
-)
+) {
+	companion object {
+		internal const val UNREGISTERED_USER = "Unregistered"
+	}
+}
 
 @Serializable
 open class SongResult(val store: UltimateGuitarStoreResult<SongResultStorePageData>)

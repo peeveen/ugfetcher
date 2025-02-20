@@ -1,5 +1,6 @@
 package com.stevenfrew.ultimateguitar
 
+import com.stevenfrew.ultimateguitar.TabInfo.Companion.UNREGISTERED_USER
 import com.stevenfrew.ultimateguitar.Tuning.Companion.STANDARD_TUNING_NAME
 
 data class Chord(val name: String, val position: Int)
@@ -38,7 +39,8 @@ class Song(data: SongResultStorePageData) {
 		val keyLine = if (tabInfo.key.isNotBlank()) "{key:${tabInfo.key}}" else null
 		val rating = Math.round(tabInfo.rating).coerceAtMost(5)
 		val ratingLine = if (rating > 0) "{rating:${rating}}" else null
-		val creatorLine = if (tabInfo.creator?.isNotBlank() == true) "{comment:Created by @${tabInfo.creator}}" else null
+		val creatorLine =
+			if (tabInfo.creator?.isNotBlank() == true && tabInfo.creator != UNREGISTERED_USER) "{comment:Created by @${tabInfo.creator}}" else null
 		val tuningLine =
 			if (tabView.meta?.tuning != null && tabView.meta.tuning.name != STANDARD_TUNING_NAME)
 				"{comment:Tuning = ${tabView.meta.tuning.name} (${tabView.meta.tuning.value})}"
@@ -61,7 +63,8 @@ class Song(data: SongResultStorePageData) {
 	fun toPlainText(): List<String> {
 		val artistLine = "by ${tabInfo.artistName}"
 		val capoLine = if (tabView.meta?.capo != null && tabView.meta.capo > 0) "CAPO ${tabView.meta.capo}" else null
-		val creatorLine = if (tabInfo.creator?.isNotBlank() == true) "Created by @${tabInfo.creator}" else null
+		val creatorLine =
+			if (tabInfo.creator?.isNotBlank() == true && tabInfo.creator != UNREGISTERED_USER) "Created by @${tabInfo.creator}" else null
 		val tuningLine =
 			if (tabView.meta?.tuning != null && tabView.meta.tuning.name != STANDARD_TUNING_NAME)
 				"Tuning = ${tabView.meta.tuning.name} (${tabView.meta.tuning.value})"
