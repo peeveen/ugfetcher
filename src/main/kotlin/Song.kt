@@ -77,6 +77,8 @@ class Song(data: SongResultStorePageData) {
 		private const val CHORD_MARKER_START = "[ch]"
 		private const val CHORD_MARKER_END = "[/ch]"
 
+		private fun getLines(s: String) = s.split('\n', '\r').filter { it.isNotEmpty() }
+
 		private fun parseLines(content: String): List<Line> =
 			mutableListOf<Line>().apply {
 				parseMarkers(
@@ -84,28 +86,35 @@ class Song(data: SongResultStorePageData) {
 					TAB_MARKER_START,
 					TAB_MARKER_END
 				) { text, start ->
-					add(parseLine(text, start == 0))
+					val isTab = start == 0
+					val textLines = if (isTab) listOf(text) else getLines(text)
+					textLines.forEach {
+						add(parseLine(it, isTab))
+					}
 				}
 			}
 
 		private fun parseLine(line: String, isTab: Boolean): Line {
 			val (text, chords) = if (isTab) {
-				val lines = line.split("\r\n")
-				val chords = lines[0]
-				val text = lines[1]
-				val (_, extractedChords) = extractChords(chords)
-				text to extractedChords
+				val lines = getLines(line)
+				if (lines.size > 1) {
+					val chords = lines[0]
+					val text = lines[1]
+					val (_, extractedChords) = extractChords(chords, true)
+					text to extractedChords
+				} else
+					extractChords(lines[0], false)
 			} else
-				extractChords(line)
+				extractChords(line, false)
 			return Line(text, chords)
 		}
 
-		private fun extractChords(line: String): Pair<String, List<Chord>> {
+		private fun extractChords(line: String, isTab: Boolean): Pair<String, List<Chord>> {
 			val chords = mutableListOf<Chord>()
 			var text = ""
 			parseMarkers(line, CHORD_MARKER_START, CHORD_MARKER_END) { chordText, start ->
 				if (start == 0)
-					chords.add(Chord(chordText, text.length + chords.sumOf { it.name.length }))
+					chords.add(Chord(chordText, text.length + if (isTab) chords.sumOf { it.name.length } else 0))
 				else
 					text += chordText
 			}
@@ -138,7 +147,7 @@ class Song(data: SongResultStorePageData) {
 					val start = if (it.startsWith(startMarker)) startMarkerLength else 0
 					val end = it.length - if (it.endsWith(endMarker)) endMarkerLength else 0
 					it.substring(start, end)
-				}.trim('\r').trim('\n')
+				}.trim('\r', '\n')
 				if (markerContent.isNotEmpty())
 					fn(markerContent, startIndex)
 				workingContent = workingContent.substring(endIndex)
