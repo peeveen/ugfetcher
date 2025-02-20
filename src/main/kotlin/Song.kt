@@ -8,20 +8,20 @@ data class Line(val text: String, val chords: List<Chord>) {
 		var offset = 0
 		chords.sortedBy { it.position }.forEach {
 			val chordText = it.name
-			val workingTextLeft = workingText.substring(0, it.position + offset)
-			val workingTextRight = workingText.substring(it.position + offset)
+			val workingTextLength = workingText.length
+			val offsetPosition = (it.position + offset).coerceAtMost(workingTextLength)
+			val workingTextLeft = workingText.substring(0, offsetPosition)
+			val workingTextRight = workingText.substring(offsetPosition)
 			workingText = "${workingTextLeft}[${chordText}]${workingTextRight}"
 			offset += chordText.length + 2
 		}
 		return workingText
 	}
 
-	private fun padWithSpaces(s: String): String = s.padEnd(chords.maxOfOrNull { it.position } ?: s.length, ' ')
-
-	fun toChordPro(): String = insertChords(padWithSpaces(text))
+	fun toChordPro(): String = insertChords(text)
 
 	fun toPlainText(): List<String> =
-		listOf(text, insertChords(padWithSpaces("")))
+		listOf(text, insertChords(""))
 }
 
 class Song(data: SongResultStorePageData) {
@@ -105,7 +105,7 @@ class Song(data: SongResultStorePageData) {
 			var text = ""
 			parseMarkers(line, CHORD_MARKER_START, CHORD_MARKER_END) { chordText, start ->
 				if (start == 0)
-					chords.add(Chord(chordText, text.length))
+					chords.add(Chord(chordText, text.length + chords.sumOf { it.name.length }))
 				else
 					text += chordText
 			}
