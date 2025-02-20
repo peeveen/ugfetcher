@@ -2,11 +2,74 @@ package com.stevenfrew.ultimateguitar
 
 data class Chord(val name: String, val position: Int)
 
-data class Line(val text: String, val chords: List<Chord>)
+data class Line(val text: String, val chords: List<Chord>) {
+	private fun insertChords(textToInsertInto: String): String {
+		var workingText = textToInsertInto
+		var offset = 0
+		chords.sortedBy { it.position }.forEach {
+			val chordText = it.name
+			val workingTextLeft = workingText.substring(0, it.position + offset)
+			val workingTextRight = workingText.substring(it.position + offset)
+			workingText = "${workingTextLeft}[${chordText}]${workingTextRight}"
+			offset += chordText.length + 2
+		}
+		return workingText
+	}
+
+	private fun padWithSpaces(s: String): String = s.padEnd(chords.maxOfOrNull { it.position } ?: s.length, ' ')
+
+	fun toChordPro(): String = insertChords(padWithSpaces(text))
+
+	fun toPlainText(): List<String> =
+		listOf(text, insertChords(padWithSpaces("")))
+}
 
 class Song(data: SongResultStorePageData) {
 	val tabInfo = data.tabInfo
-	val lines = parseLines(data.tabView.wikiTab.content)
+	private val tabView = data.tabView
+	private val lines = parseLines(data.tabView.wikiTab.content)
+
+	fun toChordPro(): List<String> {
+		val titleLine = "{title:${tabInfo.songName}}"
+		val artistLine = "{artist:${tabInfo.artistName}}"
+		val capoLine = if (tabView.meta?.capo != null && tabView.meta.capo > 0) "{capo:${tabView.meta.capo}}" else null
+		val keyLine = if (tabInfo.key.isNotBlank()) "{key:${tabInfo.key}}" else null
+		val ratingLine = "{rating:${Math.round(tabInfo.rating)}}"
+		val creatorLine = if (tabInfo.creator?.isNotBlank() == true) "{comment:Created by @${tabInfo.creator}}" else null
+		val tuningLine =
+			if (tabView.meta?.tuning != null) "{comment:Tuning = ${tabView.meta.tuning.name} (${tabView.meta.tuning.value})}" else null
+		val songLines = lines.map { it.toChordPro() }
+		return listOfNotNull(
+			titleLine,
+			artistLine,
+			capoLine,
+			keyLine,
+			ratingLine,
+			creatorLine,
+			tuningLine,
+			"",
+			*songLines.toTypedArray()
+		)
+	}
+
+	fun toPlainText(): List<String> {
+		val artistLine = "by ${tabInfo.artistName}"
+		val capoLine = if (tabView.meta?.capo != null && tabView.meta.capo > 0) "CAPO ${tabView.meta.capo}" else null
+		val creatorLine = if (tabInfo.creator?.isNotBlank() == true) "Created by @${tabInfo.creator}" else null
+		val tuningLine =
+			if (tabView.meta?.tuning != null) "Tuning = ${tabView.meta.tuning.name} (${tabView.meta.tuning.value})" else null
+		val songLines = lines.flatMap { it.toPlainText() }
+		return listOfNotNull(
+			tabInfo.songName,
+			artistLine,
+			capoLine,
+			creatorLine,
+			tuningLine,
+			"",
+			*songLines.toTypedArray()
+		)
+	}
+
 
 	companion object {
 		private const val TAB_MARKER_START = "[tab]"

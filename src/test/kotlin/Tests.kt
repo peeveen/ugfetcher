@@ -12,5 +12,7 @@ class Tests {
 		assertNotNull(result)
 		val song = SongFetcher.fetch(result)
 		assertNotNull(song)
+		val chordPro = song.toChordPro().fold("") { a, v -> a + "\n" + v }
+		assertNotNull(chordPro)
 	}
 }
