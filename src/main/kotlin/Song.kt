@@ -1,5 +1,7 @@
 package com.stevenfrew.ultimateguitar
 
+import com.stevenfrew.ultimateguitar.Tuning.Companion.STANDARD_TUNING_NAME
+
 data class Chord(val name: String, val position: Int)
 
 data class Line(val text: String, val chords: List<Chord>) {
@@ -34,10 +36,14 @@ class Song(data: SongResultStorePageData) {
 		val artistLine = "{artist:${tabInfo.artistName}}"
 		val capoLine = if (tabView.meta?.capo != null && tabView.meta.capo > 0) "{capo:${tabView.meta.capo}}" else null
 		val keyLine = if (tabInfo.key.isNotBlank()) "{key:${tabInfo.key}}" else null
-		val ratingLine = "{rating:${Math.round(tabInfo.rating)}}"
+		val rating = Math.round(tabInfo.rating).coerceAtMost(5)
+		val ratingLine = if (rating > 0) "{rating:${rating}}" else null
 		val creatorLine = if (tabInfo.creator?.isNotBlank() == true) "{comment:Created by @${tabInfo.creator}}" else null
 		val tuningLine =
-			if (tabView.meta?.tuning != null) "{comment:Tuning = ${tabView.meta.tuning.name} (${tabView.meta.tuning.value})}" else null
+			if (tabView.meta?.tuning != null && tabView.meta.tuning.name != STANDARD_TUNING_NAME)
+				"{comment:Tuning = ${tabView.meta.tuning.name} (${tabView.meta.tuning.value})}"
+			else
+				null
 		val songLines = lines.map { it.toChordPro() }
 		return listOfNotNull(
 			titleLine,
@@ -57,7 +63,10 @@ class Song(data: SongResultStorePageData) {
 		val capoLine = if (tabView.meta?.capo != null && tabView.meta.capo > 0) "CAPO ${tabView.meta.capo}" else null
 		val creatorLine = if (tabInfo.creator?.isNotBlank() == true) "Created by @${tabInfo.creator}" else null
 		val tuningLine =
-			if (tabView.meta?.tuning != null) "Tuning = ${tabView.meta.tuning.name} (${tabView.meta.tuning.value})" else null
+			if (tabView.meta?.tuning != null && tabView.meta.tuning.name != STANDARD_TUNING_NAME)
+				"Tuning = ${tabView.meta.tuning.name} (${tabView.meta.tuning.value})"
+			else
+				null
 		val songLines = lines.flatMap { it.toPlainText() }
 		return listOfNotNull(
 			tabInfo.songName,

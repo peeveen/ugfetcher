@@ -61,7 +61,11 @@ data class TabViewMeta(
 data class Tuning(
 	val name: String? = null,
 	val value: String? = null
-)
+) {
+	companion object {
+		internal const val STANDARD_TUNING_NAME = "Standard"
+	}
+}
 
 @Serializable
 data class TabViewWikiTab(
