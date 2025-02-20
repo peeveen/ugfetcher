@@ -27,4 +27,12 @@ class Tests {
 		val chordPro = song.toChordPro().fold("") { a, v -> a + "\n" + v }
 		assertNotNull(chordPro)
 	}
+
+	@Test
+	fun testFetches() {
+		val song = SongFetcher.fetch("https://tabs.ultimate-guitar.com/tab/george-michael/father-figure-chords-8343")
+		assertNotNull(song)
+		val chordPro = song.toChordPro().fold("") { a, v -> a + "\n" + v }
+		assertNotNull(chordPro)
+	}
 }

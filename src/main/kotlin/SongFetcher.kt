@@ -4,11 +4,13 @@ import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.serializer
 
 object SongFetcher {
+	fun fetch(tabInfo: TabInfo): Song? = fetch(tabInfo.tabUrl)
+
 	@OptIn(InternalSerializationApi::class)
-	fun fetch(tabInfo: TabInfo): Song? {
+	fun fetch(url: String): Song? {
 		// For some reason, the "meta" object sometimes comes in as an empty array
 		val storePageData =
-			DataFetcher.get(tabInfo.tabUrl, SongResult::class.serializer()) { it.replace("\"meta\":[],", "") }
+			DataFetcher.get(url, SongResult::class.serializer()) { it.replace("\"meta\":[],", "") }
 		return storePageData?.store?.page?.data?.let {
 			Song(it)
 		}
