@@ -27,11 +27,20 @@ data class Line(val text: String, val chords: List<Chord>) {
 		listOf(text, insertChords(""))
 }
 
+/**
+ * A "tab" that has been fetched and parsed.
+ */
 class Song(data: SongResultStorePageData) {
+	/**
+	 * The tab info (artist, title, etc)
+	 */
 	val tabInfo = data.tabInfo
 	private val tabView = data.tabView
 	private val lines = parseLines(data.tabView.wikiTab.content)
 
+	/**
+	 * Converts the tab to ChordPro format. The result is a collection of strings: lines of the ChordPro file.
+	 */
 	fun toChordPro(): List<String> {
 		val titleLine = "{title:${tabInfo.songName}}"
 		val artistLine = "{artist:${tabInfo.artistName}}"
@@ -60,6 +69,9 @@ class Song(data: SongResultStorePageData) {
 		)
 	}
 
+	/**
+	 * Converts the tab to plain text format.
+	 */
 	fun toPlainText(): List<String> {
 		val artistLine = "by ${tabInfo.artistName}"
 		val capoLine = if (tabView.meta?.capo != null && tabView.meta.capo > 0) "CAPO ${tabView.meta.capo}" else null

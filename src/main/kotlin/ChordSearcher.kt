@@ -6,9 +6,17 @@ import org.jsoup.HttpStatusException
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
+/**
+ * Singleton class for getting UG search results.
+ */
 object ChordSearcher {
 	private const val CHORDS_TYPE = "Chords"
 
+	/**
+	 * Searches the UG database for entries that match the given search string.
+	 *
+	 * @param searchString The string to search for.
+	 */
 	@OptIn(InternalSerializationApi::class)
 	fun search(searchString: String): List<TabInfo> {
 		val urlEncodedSearchString = URLEncoder.encode(searchString, StandardCharsets.UTF_8.toString())

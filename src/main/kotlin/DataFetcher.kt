@@ -4,7 +4,7 @@ import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json
 import org.jsoup.Jsoup
 
-object DataFetcher {
+internal object DataFetcher {
 	internal const val ULTIMATE_GUITAR_HOST = "https://www.ultimate-guitar.com"
 	private const val JS_STORE_CLASS = "js-store"
 	private const val DATA_CONTENT_ATTRIBUTE = "data-content"
