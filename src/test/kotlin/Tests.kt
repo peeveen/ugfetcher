@@ -1,6 +1,7 @@
 import com.stevenfrew.ultimateguitar.ChordSearcher
 import com.stevenfrew.ultimateguitar.SongFetcher
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class Tests {
@@ -26,6 +27,12 @@ class Tests {
 		assertNotNull(song)
 		val chordPro = song.toChordPro().fold("") { a, v -> a + "\n" + v }
 		assertNotNull(chordPro)
+	}
+
+	@Test
+	fun testSearchWithNoResults() {
+		val results = ChordSearcher.search("wepfiojkweofwepfkwepofkwep")
+		assertEquals(0, results.count())
 	}
 
 	@Test
