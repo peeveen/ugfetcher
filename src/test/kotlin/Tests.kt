@@ -1,5 +1,5 @@
-import com.stevenfrew.ultimateguitar.ChordSearcher
-import com.stevenfrew.ultimateguitar.SongFetcher
+import com.github.peeveen.ultimateguitar.ChordSearcher
+import com.github.peeveen.ultimateguitar.SongFetcher
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

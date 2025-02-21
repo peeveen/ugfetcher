@@ -1,7 +1,7 @@
-package com.stevenfrew.ultimateguitar
+package com.github.peeveen.ultimateguitar
 
-import com.stevenfrew.ultimateguitar.TabInfo.Companion.UNREGISTERED_USER
-import com.stevenfrew.ultimateguitar.Tuning.Companion.STANDARD_TUNING_NAME
+import com.github.peeveen.ultimateguitar.TabInfo.Companion.UNREGISTERED_USER
+import com.github.peeveen.ultimateguitar.Tuning.Companion.STANDARD_TUNING_NAME
 
 data class Chord(val name: String, val position: Int)
 

@@ -4,9 +4,22 @@
 				 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.stevenfrew</groupId>
+	<groupId>com.github.peeveen</groupId>
 	<artifactId>ultimateguitar</artifactId>
 	<version>1.0.0</version>
+
+	<developers>
+		<developer>
+			<name>Steven Frew</name>
+			<email>steven.fullhouse@gmail.com</email>
+		</developer>
+	</developers>
+
+	<scm>
+		<connection>scm:git:git://github.com/peeveen/ugfetcher.git</connection>
+		<developerConnection>scm:git:ssh://github.com/peeveen/ugfetcher.git</developerConnection>
+		<url>https://github.com/peeveen/ugfetcher.git</url>
+	</scm>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

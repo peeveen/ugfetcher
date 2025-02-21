@@ -1,4 +1,4 @@
-package com.stevenfrew.ultimateguitar
+package com.github.peeveen.ultimateguitar
 
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json
