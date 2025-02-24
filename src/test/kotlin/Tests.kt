@@ -42,4 +42,13 @@ class Tests {
 		val chordPro = song.toChordPro().fold("") { a, v -> a + "\n" + v }
 		assertNotNull(chordPro)
 	}
+
+	@Test
+	fun testOddChords() {
+		val song =
+			SongFetcher.fetch("https://tabs.ultimate-guitar.com/tab/garth-brooks/friends-in-low-places-chords-1087784")
+		assertNotNull(song)
+		val chordPro = song.toChordPro().fold("") { a, v -> a + "\n" + v }
+		assertNotNull(chordPro)
+	}
 }

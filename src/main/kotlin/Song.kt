@@ -32,7 +32,7 @@ data class Line(val text: String, val chords: List<Chord>) {
  */
 class Song(data: SongResultStorePageData) {
 	/**
-	 * The tab info (artist, title, etc)
+	 * The tab info (artist, title, etc.)
 	 */
 	val tabInfo = data.tabInfo
 	private val tabView = data.tabView
@@ -109,35 +109,32 @@ class Song(data: SongResultStorePageData) {
 					content,
 					TAB_MARKER_START,
 					TAB_MARKER_END
-				) { text, start ->
-					val isTab = start == 0
-					val textLines = if (isTab) listOf(text) else getLines(text)
-					textLines.forEach {
-						add(parseLine(it, isTab))
-					}
+				) { text, isTab ->
+					val textLines = getLines(text)
+					addAll(parseLines(textLines, isTab))
 				}
 			}
 
-		private fun parseLine(line: String, isTab: Boolean): Line {
-			val (text, chords) = if (isTab) {
-				val lines = getLines(line)
-				if (lines.size > 1) {
-					val chords = lines[0]
-					val text = lines[1]
-					val (_, extractedChords) = extractChords(chords, true)
-					text to extractedChords
+		private fun parseLines(lines: List<String>, isTab: Boolean): List<Line> {
+			var index = 0
+			val parsedLines = mutableListOf<Line>()
+			while (index < lines.count()) {
+				val line = lines[index++]
+				val (text, extractedChords) = extractChords(line, isTab)
+				if (extractedChords.any() && (text.isBlank() || lines.count() == 2)) {
+					val nextLineText = if (index < lines.count()) lines[index++] else ""
+					parsedLines.add(Line(nextLineText, extractedChords))
 				} else
-					extractChords(lines[0], false)
-			} else
-				extractChords(line, false)
-			return Line(text, chords)
+					parsedLines.add(Line(text, extractedChords))
+			}
+			return parsedLines
 		}
 
 		private fun extractChords(line: String, isTab: Boolean): Pair<String, List<Chord>> {
 			val chords = mutableListOf<Chord>()
 			var text = ""
-			parseMarkers(line, CHORD_MARKER_START, CHORD_MARKER_END) { chordText, start ->
-				if (start == 0)
+			parseMarkers(line, CHORD_MARKER_START, CHORD_MARKER_END) { chordText, isChord ->
+				if (isChord)
 					chords.add(Chord(chordText, text.length + if (isTab) chords.sumOf { it.name.length } else 0))
 				else
 					text += chordText
@@ -149,7 +146,7 @@ class Song(data: SongResultStorePageData) {
 			content: String,
 			startMarker: String,
 			endMarker: String,
-			fn: (String, Int) -> Unit
+			fn: (String, Boolean) -> Unit
 		) {
 			var workingContent = content
 			val startMarkerLength = startMarker.length
@@ -173,7 +170,7 @@ class Song(data: SongResultStorePageData) {
 					it.substring(start, end)
 				}.trim('\r', '\n')
 				if (markerContent.isNotEmpty())
-					fn(markerContent, startIndex)
+					fn(markerContent, startIndex == 0)
 				workingContent = workingContent.substring(endIndex)
 			}
 		}
