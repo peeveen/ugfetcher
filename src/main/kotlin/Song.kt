@@ -111,23 +111,34 @@ class Song(data: SongResultStorePageData) {
 					TAB_MARKER_END
 				) { text, isTab ->
 					val textLines = getLines(text)
-					addAll(parseLines(textLines, isTab))
+					addAll(parseLines(textLines, listOf(), isTab))
 				}
 			}
 
-		private fun parseLines(lines: List<String>, isTab: Boolean): List<Line> {
-			var index = 0
-			val parsedLines = mutableListOf<Line>()
-			while (index < lines.count()) {
-				val line = lines[index++]
-				val (text, extractedChords) = extractChords(line, isTab)
-				if (extractedChords.any() && (text.isBlank() || lines.count() == 2)) {
-					val nextLineText = if (index < lines.count()) lines[index++] else ""
-					parsedLines.add(Line(nextLineText, extractedChords))
-				} else
-					parsedLines.add(Line(text, extractedChords))
+		private fun parseLines(lines: List<String>, previousLineChords: List<Chord>, isTab: Boolean): List<Line> {
+			if (lines.isEmpty())
+				return if (previousLineChords.isEmpty()) listOf() else listOf(Line("", previousLineChords))
+			val nextLine = lines.first()
+			val remainingLines = lines.takeLast(lines.count() - 1)
+			val (text, extractedChords) = extractChords(nextLine, isTab)
+			if (extractedChords.any()) {
+				if (text.isNotBlank())
+					return if (previousLineChords.any())
+						listOf(
+							Line("", previousLineChords),
+							Line(text, extractedChords),
+							*parseLines(remainingLines, extractedChords, isTab).toTypedArray()
+						)
+					else
+						listOf(Line(text, extractedChords), *parseLines(remainingLines, listOf(), isTab).toTypedArray())
+				return if (previousLineChords.any())
+					listOf(Line("", previousLineChords), *parseLines(remainingLines, extractedChords, isTab).toTypedArray())
+				else
+					parseLines(remainingLines, extractedChords, isTab)
 			}
-			return parsedLines
+			if (text.isNotBlank())
+				return listOf(Line(text, previousLineChords), *parseLines(remainingLines, listOf(), isTab).toTypedArray())
+			return parseLines(remainingLines, listOf(), isTab)
 		}
 
 		private fun extractChords(line: String, isTab: Boolean): Pair<String, List<Chord>> {

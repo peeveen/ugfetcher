@@ -51,4 +51,13 @@ class Tests {
 		val chordPro = song.toChordPro().fold("") { a, v -> a + "\n" + v }
 		assertNotNull(chordPro)
 	}
+
+	@Test
+	fun testTwoLineAnomaly() {
+		val song =
+			SongFetcher.fetch("https://tabs.ultimate-guitar.com/tab/pet-shop-boys/left-to-my-own-devices-chords-2433069")
+		assertNotNull(song)
+		val chordPro = song.toChordPro().fold("") { a, v -> a + "\n" + v }
+		assertNotNull(chordPro)
+	}
 }
