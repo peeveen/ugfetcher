@@ -3,35 +3,43 @@ package com.github.peeveen.ultimateguitar
 import com.github.peeveen.ultimateguitar.TabInfo.Companion.UNREGISTERED_USER
 import com.github.peeveen.ultimateguitar.Tuning.Companion.STANDARD_TUNING_NAME
 
-data class Chord(val name: String, val position: Int)
+data class Chord(val name: String, val position: Int, val sectionMarker: Boolean = false)
 
 data class Line(val text: String, val chords: List<Chord>) {
 	private fun insertChords(
 		textToInsertInto: String,
-		chordMarkerStart: String,
-		chordMarkerEnd: String,
-		applyOffset: Boolean
+		chordMarkers: Pair<String, String>,
+		sectionMarkers: Pair<String, String>,
+		forChordPro: Boolean = false,
+		isPlainTextChordsOnly: Boolean = false
 	): String {
 		var workingText = textToInsertInto
 		var offset = 0
-		val chordMarkerLength = chordMarkerStart.length + chordMarkerEnd.length
 		chords.sortedBy { it.position }.forEach {
 			val chordText = it.name
+			val (markerStart, markerEnd) = if (it.sectionMarker) sectionMarkers else chordMarkers
+			val markerLength = markerStart.length + markerEnd.length
 			val workingTextLength = workingText.length
 			val offsetPosition = (it.position + offset).coerceAtMost(workingTextLength)
 			val workingTextLeft = workingText.substring(0, offsetPosition)
 			val workingTextRight = workingText.substring(offsetPosition)
-			workingText = "$workingTextLeft$chordMarkerStart$chordText$chordMarkerEnd$workingTextRight"
-			if (applyOffset)
-				offset += chordText.length + chordMarkerLength
+			workingText = "$workingTextLeft$markerStart$chordText$markerEnd$workingTextRight"
+			if (forChordPro)
+				offset += chordText.length + markerLength
+			else
+				offset += if (isPlainTextChordsOnly) chordText.length else 0
 		}
 		return workingText
 	}
 
-	fun toChordPro(): String = insertChords(text, Song.CHORD_START, Song.CHORD_END, true)
+	fun toChordPro(): String = insertChords(text, Song.CHORD_START to Song.CHORD_END, "[" to "]", true, false)
 
 	fun toPlainText(): List<String> =
-		listOf(insertChords("".padEnd(chords.maxOfOrNull { it.position } ?: 0, ' '), "", "", false), text)
+		listOf(insertChords("".padEnd(chords.maxOfOrNull { it.position } ?: 0, ' '),
+			"" to "",
+			"[" to "]",
+			false,
+			text.isBlank()), text)
 }
 
 /**
@@ -89,7 +97,7 @@ class Song(data: SongResultStorePageData) {
 				"Tuning = ${tabView.meta.tuning.name} (${tabView.meta.tuning.value})"
 			else
 				null
-		val songLines = lines.flatMap { it.toPlainText() }
+		val songLines = lines.flatMap { it.toPlainText().filter { line -> line.isNotBlank() } }
 		return listOfNotNull(
 			tabInfo.songName,
 			artistLine,
@@ -165,7 +173,7 @@ class Song(data: SongResultStorePageData) {
 				// ChordPro treats these as chords.
 				parseMarkers(line, CHORD_START, CHORD_END) { chordText, isChord ->
 					if (isChord)
-						chords.add(Chord(chordText, text.length + if (isTab) chords.sumOf { it.name.length } else 0))
+						chords.add(Chord(chordText, text.length + if (isTab) chords.sumOf { it.name.length } else 0, true))
 					else
 						text += chordText
 				}
