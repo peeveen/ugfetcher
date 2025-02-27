@@ -60,4 +60,13 @@ class Tests {
 		val chordPro = song.toChordPro().fold("") { a, v -> a + "\n" + v }
 		assertNotNull(chordPro)
 	}
+
+	@Test
+	fun testSongSectionAsChord() {
+		val song =
+			SongFetcher.fetch("https://tabs.ultimate-guitar.com/tab/justin-bieber/love-yourself-chords-1780199")
+		assertNotNull(song)
+		val chordPro = song.toChordPro().fold("") { a, v -> a + "\n" + v }
+		assertNotNull(chordPro)
+	}
 }

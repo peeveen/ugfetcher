@@ -6,25 +6,32 @@ import com.github.peeveen.ultimateguitar.Tuning.Companion.STANDARD_TUNING_NAME
 data class Chord(val name: String, val position: Int)
 
 data class Line(val text: String, val chords: List<Chord>) {
-	private fun insertChords(textToInsertInto: String): String {
+	private fun insertChords(
+		textToInsertInto: String,
+		chordMarkerStart: String,
+		chordMarkerEnd: String,
+		applyOffset: Boolean
+	): String {
 		var workingText = textToInsertInto
 		var offset = 0
+		val chordMarkerLength = chordMarkerStart.length + chordMarkerEnd.length
 		chords.sortedBy { it.position }.forEach {
 			val chordText = it.name
 			val workingTextLength = workingText.length
 			val offsetPosition = (it.position + offset).coerceAtMost(workingTextLength)
 			val workingTextLeft = workingText.substring(0, offsetPosition)
 			val workingTextRight = workingText.substring(offsetPosition)
-			workingText = "${workingTextLeft}[${chordText}]${workingTextRight}"
-			offset += chordText.length + 2
+			workingText = "$workingTextLeft$chordMarkerStart$chordText$chordMarkerEnd$workingTextRight"
+			if (applyOffset)
+				offset += chordText.length + chordMarkerLength
 		}
 		return workingText
 	}
 
-	fun toChordPro(): String = insertChords(text)
+	fun toChordPro(): String = insertChords(text, Song.CHORD_START, Song.CHORD_END, true)
 
 	fun toPlainText(): List<String> =
-		listOf(text, insertChords(""))
+		listOf(insertChords("".padEnd(chords.maxOfOrNull { it.position } ?: 0, ' '), "", "", false), text)
 }
 
 /**
@@ -100,6 +107,8 @@ class Song(data: SongResultStorePageData) {
 		private const val TAB_MARKER_END = "[/tab]"
 		private const val CHORD_MARKER_START = "[ch]"
 		private const val CHORD_MARKER_END = "[/ch]"
+		internal const val CHORD_START = "["
+		internal const val CHORD_END = "]"
 
 		private fun getLines(s: String) = s.split('\n', '\r').filter { it.isNotEmpty() }
 
@@ -149,6 +158,17 @@ class Song(data: SongResultStorePageData) {
 					chords.add(Chord(chordText, text.length + if (isTab) chords.sumOf { it.name.length } else 0))
 				else
 					text += chordText
+			}
+			if (chords.none()) {
+				text = ""
+				// No "official" UG-style chords, but there might be "[Chorus]" and suchlike.
+				// ChordPro treats these as chords.
+				parseMarkers(line, CHORD_START, CHORD_END) { chordText, isChord ->
+					if (isChord)
+						chords.add(Chord(chordText, text.length + if (isTab) chords.sumOf { it.name.length } else 0))
+					else
+						text += chordText
+				}
 			}
 			return text to chords
 		}
