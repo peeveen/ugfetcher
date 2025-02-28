@@ -50,7 +50,7 @@ class Song(data: SongResultStorePageData) {
 	 * The tab info (artist, title, etc.)
 	 */
 	val tabInfo = data.tabInfo
-	private val tabView = data.tabView
+	val tabView = data.tabView
 	private val lines = parseLines(data.tabView.wikiTab.content)
 
 	/**
